@@ -55,9 +55,11 @@ function cleanReport(d, date, who, by) {
     date,
     userId: who.id,
     userName: who.name,
+    openingCash: num(d.openingCash),
     income: { qris: num(income.qris), transfer: num(income.transfer), cash: num(income.cash) },
+    cashToCashless: num(d.cashToCashless),
     expenses: (Array.isArray(d.expenses) ? d.expenses : [])
-      .map((e) => ({ desc: str(e.desc, 120), amount: num(e.amount) }))
+      .map((e) => ({ desc: str(e.desc, 120), amount: num(e.amount), method: e.method === "cashless" ? "cashless" : "cash" }))
       .filter((e) => e.desc || e.amount)
       .slice(0, 100),
     itemsSold: num(d.itemsSold),
