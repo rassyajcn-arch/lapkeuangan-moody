@@ -111,7 +111,27 @@ textarea{resize:vertical;min-height:70px}
 .pm{display:flex;align-items:center;gap:8px;font-weight:800}
 .pm i{width:10px;height:10px;border-radius:3px;display:inline-block}
 .exp-list{display:grid;gap:8px}
-.exp-row{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) 44px;gap:8px;align-items:center}
+.exp-row{display:grid;grid-template-columns:minmax(0,1fr) auto 44px;grid-template-areas:"d d x" "a m x";gap:8px;align-items:center;padding:10px;border-radius:12px;background:var(--bg);border:1.5px solid var(--line)}
+.exp-row .ed{grid-area:d}.exp-row .money{grid-area:a}.exp-row .seg{grid-area:m}.exp-row .x{grid-area:x;align-self:start}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:999px;padding:3px;background:var(--paper)}
+.seg button{border:0;background:transparent;border-radius:999px;padding:7px 12px;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer;min-height:36px}
+.seg button[aria-pressed="true"]{background:var(--green);color:var(--on-green)}
+.seg button.cl[aria-pressed="true"]{background:#4C9C7E;color:#fff}
+.summary .sec{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-top:4px}
+.summary .div{border-top:1px solid rgba(255,255,255,.22);margin-block:2px}
+.summary .row.ind span:first-child{padding-left:12px;opacity:.75}
+.saved{gap:16px}
+.saved .ok{display:flex;align-items:center;gap:12px}
+.saved .ok i{width:44px;height:44px;border-radius:50%;background:var(--green);color:var(--on-green);display:grid;place-items:center;font-style:normal;font-size:22px;font-weight:800;flex:none}
+.saved .ok b{display:block;font-size:17px}
+.receipt{display:grid;gap:6px;font-variant-numeric:tabular-nums;font-size:14px}
+.receipt .r{display:flex;justify-content:space-between;gap:10px}
+.receipt .r span:first-child{color:var(--muted)}
+.receipt .r.ind span:first-child{padding-left:12px}
+.receipt .r.tot{font-weight:800;border-top:1.5px dashed var(--line);padding-top:6px}
+.receipt .r.tot span:first-child{color:var(--ink)}
+.receipt h3{margin:8px 0 2px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--green-deep)}
+.saved .acts{display:flex;gap:8px;flex-wrap:wrap}
 
 /* summary block */
 .summary{background:var(--hero);color:#fff;border-radius:20px;padding:18px 20px;display:grid;gap:10px}
@@ -230,7 +250,8 @@ tr.detail td{background:var(--bg);white-space:normal;text-align:left}
   .chip .role{display:none}
   .panel{padding:16px;border-radius:16px}
   .income-row{grid-template-columns:84px minmax(0,1fr)}
-  .exp-row{grid-template-columns:minmax(0,1fr) minmax(0,.9fr) 40px;gap:6px}
+  .exp-row{grid-template-columns:minmax(0,1fr) 40px;grid-template-areas:"d x" "a a" "m m";gap:6px}
+  .exp-row .seg{display:flex}.exp-row .seg button{flex:1}
   .prof{grid-template-columns:1fr 1fr;grid-template-areas:"n r" "c c" "a a"}
   .prof .pn{grid-area:n}.prof .pr2{grid-area:r}.prof .pc{grid-area:c}.prof .acts{grid-area:a;justify-content:flex-end}
   .hb{grid-template-columns:minmax(56px,84px) minmax(0,1fr) 48px;gap:8px}
@@ -290,8 +311,17 @@ tr.detail td{background:var(--bg);white-space:normal;text-align:left}
         </div>
       </div>
 
+      <div class="panel saved" id="savedView" hidden></div>
+
+      <div id="formView" style="display:grid;gap:18px">
       <div class="grid2">
         <div class="col">
+          <div class="panel">
+            <h2>Cash awal</h2>
+            <label class="income-row"><span class="pm"><i class="c-cash"></i>Nominal</span><span class="money"><input id="inOpening" inputmode="numeric" placeholder="0"></span></label>
+            <p class="hint">Uang cash di laci saat shift dibuka.</p>
+          </div>
+
           <div class="panel">
             <h2>Pemasukan</h2>
             <div class="income">
@@ -304,19 +334,16 @@ tr.detail td{background:var(--bg);white-space:normal;text-align:left}
           <div class="panel">
             <div class="panel-head"><h2>Pengeluaran</h2><button class="btn sm" type="button" id="addExp">+ Tambah</button></div>
             <div class="exp-list" id="expList"></div>
-            <p class="hint">Contoh: es batu, galon, gas, parkir, belanja susu.</p>
+            <p class="hint">Contoh: es batu, galon, gas, parkir, belanja susu. Pilih Cash bila dibayar dari laci.</p>
           </div>
 
-          <div class="summary" aria-live="polite">
-            <div class="row"><span>QRIS</span><span id="sQris">Rp0</span></div>
-            <div class="row"><span>Transfer</span><span id="sTransfer">Rp0</span></div>
-            <div class="row"><span>Cash</span><span id="sCash">Rp0</span></div>
-            <div class="row"><span>Total pemasukan</span><b id="sIn">Rp0</b></div>
-            <div class="row"><span>Total pengeluaran</span><b id="sOut">−Rp0</b></div>
-            <div class="row big"><span>Saldo bersih</span><b id="sNet">Rp0</b></div>
-            <div class="row sub"><span>Sisa cash di laci<br><small>jika pengeluaran dibayar dari cash</small></span><span id="sDrawer">Rp0</span></div>
-            
+          <div class="panel">
+            <h2>Cash to cashless</h2>
+            <label class="income-row"><span class="pm"><i class="c-transfer"></i>Nominal</span><span class="money"><input id="inC2C" inputmode="numeric" placeholder="0"></span></label>
+            <p class="hint">Cash dari laci yang dipindahkan ke rekening atau cashless. Mengurangi cash di laci.</p>
           </div>
+
+          <div class="summary" aria-live="polite" id="summary"></div>
         </div>
 
         <div class="col">
@@ -338,8 +365,10 @@ tr.detail td{background:var(--bg);white-space:normal;text-align:left}
 
       <div class="savebar">
         <span class="status-line" id="saveState"></span>
+        <button class="btn ghost sm" type="button" id="cancelEdit" hidden>Batal</button>
         <button class="btn danger sm" type="button" id="delRep" hidden>Hapus laporan</button>
         <button class="btn primary" type="button" id="saveRep">Simpan laporan</button>
+      </div>
       </div>
     </div>
 
@@ -367,7 +396,7 @@ tr.detail td{background:var(--bg);white-space:normal;text-align:left}
       </div>
       <div class="panel">
         <div class="panel-head"><h2>Per hari</h2><span class="hint">Ketuk baris untuk melihat detail per orang</span></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Tanggal</th><th>QRIS</th><th>Transfer</th><th>Cash</th><th>Pengeluaran</th><th>Bersih</th><th>Item</th></tr></thead><tbody id="rekapBody"></tbody></table></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Tanggal</th><th>QRIS</th><th>Transfer</th><th>Cash</th><th>Pengeluaran</th><th>Bersih</th><th>Cash akhir</th><th>Item</th></tr></thead><tbody id="rekapBody"></tbody></table></div>
       </div>
     </div>
 
@@ -456,7 +485,7 @@ function serverBackend(){
 }
 /* Demo: same actions, kept in this browser only (for preview before Netlify is live) */
 function demoBackend(){
-  const K="moody-finance-demo-v2";
+  const K="moody-finance-demo-v3";
   const read=()=>{try{return JSON.parse(localStorage.getItem(K))}catch(e){return null}};
   let mem=read();
   const save=()=>{try{localStorage.setItem(K,JSON.stringify(mem))}catch(e){}};
@@ -466,7 +495,7 @@ function demoBackend(){
     /* contoh data: 6 hari terakhir */
     for(let d=1;d<=6;d++){const date=addDays(today(),-d);
       mem.profiles.forEach((p,pi)=>{if((d+pi)%4===0)return;const sold=8+((d*7+pi*5)%18),val=sold*26000;
-        mem.reports[date+"__"+p.id]={date,userId:p.id,userName:p.name,income:{qris:Math.round(val*.55/1000)*1000,transfer:Math.round(val*.1/1000)*1000,cash:Math.round(val*.35/1000)*1000},expenses:(d+pi)%2?[{desc:"Es batu",amount:15000},{desc:"Galon",amount:22000}]:[{desc:"Susu UHT 2L",amount:38000}],itemsSold:sold,notes:"Contoh data",updatedAt:new Date().toISOString(),updatedBy:p.name};
+        mem.reports[date+"__"+p.id]={date,userId:p.id,userName:p.name,openingCash:200000,cashToCashless:(d%3===0?100000:0),income:{qris:Math.round(val*.55/1000)*1000,transfer:Math.round(val*.1/1000)*1000,cash:Math.round(val*.35/1000)*1000},expenses:(d+pi)%2?[{desc:"Es batu",amount:15000,method:"cash"},{desc:"Galon",amount:22000,method:"cash"}]:[{desc:"Susu UHT 2L",amount:38000,method:"cashless"}],itemsSold:sold,notes:"Contoh data",updatedAt:new Date().toISOString(),updatedBy:p.name};
       });}
     save();
   }
@@ -595,22 +624,27 @@ function setupRepFor(){
   sel.hidden=false;
 }
 function findReport(date,uid){return (S.months[date.slice(0,7)]||[]).find(r=>r.date===date&&r.userId===uid)}
-function emptyDraft(){return{income:{qris:0,transfer:0,cash:0},expenses:[{desc:"",amount:0}],itemsSold:0,notes:""}}
+const newExp=()=>({desc:"",amount:0,method:"cash"});
+function emptyDraft(){return{openingCash:0,income:{qris:0,transfer:0,cash:0},expenses:[newExp()],cashToCashless:0,itemsSold:0,notes:""}}
 async function loadDraft(){
   const date=$("#repDate").value||today();
   await loadMonth(date.slice(0,7));
   const r=findReport(date,currentFor());
   const d=emptyDraft();
-  if(r){d.income={...d.income,...r.income};d.expenses=r.expenses&&r.expenses.length?r.expenses.map(e=>({...e})):[{desc:"",amount:0}];
-    d.itemsSold=kpiCount(r);d.notes=r.notes||""}
-  S.draft=d;S.dirty=false;S.existing=!!r;
+  if(r){d.income={...d.income,...r.income};d.expenses=r.expenses&&r.expenses.length?r.expenses.map(e=>({method:"cash",...e})):[newExp()];
+    d.openingCash=r.openingCash||0;d.cashToCashless=r.cashToCashless||0;d.itemsSold=kpiCount(r);d.notes=r.notes||""}
+  S.draft=d;S.dirty=false;S.existing=!!r;S.current=r||null;
   $("#dayTitle").textContent=date===today()?"Hari ini · "+longDate(date).split(", ")[1]:longDate(date);
   $("#repStatus").textContent=r?`Tersimpan · diubah ${new Date(r.updatedAt).toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}${r.updatedBy&&r.updatedBy!==r.userName?" oleh "+r.updatedBy:""}`:"Belum ada laporan untuk tanggal ini";
   $("#delRep").hidden=!r;
+  showMode(r&&!S.editing?"saved":"form");
+  $("#inOpening").value=fmtIn(d.openingCash);$("#inC2C").value=fmtIn(d.cashToCashless);
   $("#inQris").value=fmtIn(d.income.qris);$("#inTransfer").value=fmtIn(d.income.transfer);$("#inCash").value=fmtIn(d.income.cash);
   $("#repNotes").value=d.notes;
   $("#sold").value=d.itemsSold||"";renderExp();recalc();
 }
+$("#inOpening").addEventListener("input",e=>{const n=digits(e.target.value);e.target.value=fmtIn(n);S.draft.openingCash=n;dirty();recalc()});
+$("#inC2C").addEventListener("input",e=>{const n=digits(e.target.value);e.target.value=fmtIn(n);S.draft.cashToCashless=n;dirty();recalc()});
 ["inQris","inTransfer","inCash"].forEach(id=>{
   const el=$("#"+id);
   el.addEventListener("input",()=>{const n=digits(el.value);el.value=fmtIn(n);S.draft.income[id.slice(2).toLowerCase()]=n;dirty();recalc()});
@@ -622,15 +656,16 @@ function renderExp(){
   const list=$("#expList");list.innerHTML="";
   S.draft.expenses.forEach((e,i)=>{
     const row=document.createElement("div");row.className="exp-row";
-    row.innerHTML=`<input aria-label="Keterangan pengeluaran" placeholder="Keterangan" value="${esc(e.desc)}" id="ed-${i}"><span class="money"><input aria-label="Nominal" inputmode="numeric" placeholder="0" value="${fmtIn(e.amount)}" id="ea-${i}"></span><button type="button" class="x" aria-label="Hapus pengeluaran">×</button>`;
+    row.innerHTML=`<input class="ed" aria-label="Keterangan pengeluaran" placeholder="Keterangan (mis. es batu)" value="${esc(e.desc)}" id="ed-${i}"><span class="money"><input aria-label="Nominal" inputmode="numeric" placeholder="0" value="${fmtIn(e.amount)}" id="ea-${i}"></span><span class="seg" role="group" aria-label="Dibayar dengan"><button type="button" data-m="cash" aria-pressed="${e.method!=="cashless"}">Cash</button><button type="button" class="cl" data-m="cashless" aria-pressed="${e.method==="cashless"}">Cashless</button></span><button type="button" class="x" aria-label="Hapus pengeluaran">×</button>`;
+    row.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{e.method=b.dataset.m;row.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",x===b));dirty();recalc()});
     const [d,a]=row.querySelectorAll("input");
     d.addEventListener("input",()=>{e.desc=d.value;dirty()});
     a.addEventListener("input",()=>{e.amount=digits(a.value);a.value=fmtIn(e.amount);dirty();recalc()});
-    row.querySelector(".x").onclick=()=>{S.draft.expenses.splice(i,1);if(!S.draft.expenses.length)S.draft.expenses.push({desc:"",amount:0});dirty();renderExp();recalc()};
+    row.querySelector(".x").onclick=()=>{S.draft.expenses.splice(i,1);if(!S.draft.expenses.length)S.draft.expenses.push(newExp());dirty();renderExp();recalc()};
     list.appendChild(row);
   });
 }
-$("#addExp").onclick=()=>{S.draft.expenses.push({desc:"",amount:0});renderExp();const r=$("#expList").lastElementChild;r&&r.querySelector("input").focus()};
+$("#addExp").onclick=()=>{S.draft.expenses.push(newExp());renderExp();const r=$("#expList").lastElementChild;r&&r.querySelector("input").focus()};
 
 function setSold(n){S.draft.itemsSold=Math.max(0,n|0);const el=$("#sold");if(document.activeElement!==el||!n)el.value=S.draft.itemsSold||"";dirty();recalc()}
 $("#sold").addEventListener("input",e=>{e.target.value=e.target.value.replace(/\D/g,"");setSold(parseInt(e.target.value)||0)});
@@ -643,30 +678,94 @@ function kpiHero(el,count,target,label){
     <div class="track big" role="img" aria-label="${pct} persen dari target"><div class="fill ${level(pct)}" style="width:${Math.min(pct,scale)/scale*100}%"></div><div class="target" style="left:${100/scale*100}%"></div></div>
     <div class="target-lbl"><span>0</span><span>Target ${target}${pct>100?" · lebih "+(count-target)+" item":count<target?" · kurang "+(target-count)+" item":""}</span></div>`;
 }
+function calcReport(d){
+  const inc=(d.income?.qris||0)+(d.income?.transfer||0)+(d.income?.cash||0);
+  const ex=(d.expenses||[]).filter(e=>e.amount);
+  const outCash=ex.filter(e=>e.method!=="cashless").reduce((a,e)=>a+e.amount,0),outCl=ex.filter(e=>e.method==="cashless").reduce((a,e)=>a+e.amount,0);
+  const drawer=(d.openingCash||0)+(d.income?.cash||0)-outCash-(d.cashToCashless||0);
+  return{inc,out:outCash+outCl,outCash,outCl,net:inc-outCash-outCl,drawer};
+}
+const neg=n=>"−"+rp(n).replace("−","");
 function recalc(){
-  const d=S.draft,inc=d.income.qris+d.income.transfer+d.income.cash,out=d.expenses.reduce((a,e)=>a+(e.amount||0),0);
-  $("#sQris").textContent=rp(d.income.qris);$("#sTransfer").textContent=rp(d.income.transfer);$("#sCash").textContent=rp(d.income.cash);
-  $("#sIn").textContent=rp(inc);$("#sOut").textContent="−"+rp(out).replace("−","");$("#sNet").textContent=rp(inc-out);$("#sDrawer").textContent=rp(d.income.cash-out);
+  const d=S.draft,c=calcReport(d);
+  $("#summary").innerHTML=`
+    <div class="sec">Pemasukan</div>
+    <div class="row ind"><span>QRIS</span><span>${rp(d.income.qris)}</span></div>
+    <div class="row ind"><span>Transfer</span><span>${rp(d.income.transfer)}</span></div>
+    <div class="row ind"><span>Cash</span><span>${rp(d.income.cash)}</span></div>
+    <div class="row"><span>Total pemasukan</span><b>${rp(c.inc)}</b></div>
+    <div class="row"><span>Total pengeluaran</span><b>${neg(c.out)}</b></div>
+    <div class="row ind"><span>dibayar cash</span><span>${rp(c.outCash)}</span></div>
+    <div class="row ind"><span>dibayar cashless</span><span>${rp(c.outCl)}</span></div>
+    <div class="row big"><span>Saldo bersih</span><b>${rp(c.net)}</b></div>
+    <div class="div"></div>
+    <div class="sec">Cash di laci</div>
+    <div class="row ind"><span>Cash awal</span><span>${rp(d.openingCash)}</span></div>
+    <div class="row ind"><span>+ Pemasukan cash</span><span>${rp(d.income.cash)}</span></div>
+    <div class="row ind"><span>− Pengeluaran cash</span><span>${neg(c.outCash)}</span></div>
+    <div class="row ind"><span>− Cash to cashless</span><span>${neg(d.cashToCashless)}</span></div>
+    <div class="row big"><span>Cash akhir di laci</span><b>${rp(c.drawer)}</b></div>
+    ${c.drawer<0?`<div class="sub">Cash akhir minus. Cek lagi cash awal atau metode pembayaran pengeluaran.</div>`:""}`;
   const cnt=S.draft.itemsSold||0;
   const target=S.config.kpi||20;
   const forName=isAdmin()&&currentFor()!==session.me.id?(S.profiles.find(p=>p.id===currentFor())||{}).name:"kamu";
   kpiHero($("#kpiToday"),cnt,target,`KPI ${forName} hari ini`);
 }
+function showMode(m){
+  $("#savedView").hidden=m!=="saved";$("#formView").hidden=m!=="form";
+  $("#cancelEdit").hidden=!(m==="form"&&S.current);
+  if(m==="saved")renderSaved();
+}
+function renderSaved(){
+  const r=S.current;if(!r)return;const c=calcReport(r),target=S.config.kpi||20,cnt=kpiCount(r);
+  const ex=(r.expenses||[]).filter(e=>e.amount||e.desc);
+  $("#savedView").innerHTML=`
+    <div class="ok"><i aria-hidden="true">✓</i><div><b>Laporan tersimpan</b><span class="hint">${esc(r.userName)} · ${longDate(r.date)}</span></div></div>
+    <div class="grid2">
+      <div class="receipt">
+        <h3>Pemasukan</h3>
+        <div class="r ind"><span>QRIS</span><span>${rp(r.income?.qris)}</span></div>
+        <div class="r ind"><span>Transfer</span><span>${rp(r.income?.transfer)}</span></div>
+        <div class="r ind"><span>Cash</span><span>${rp(r.income?.cash)}</span></div>
+        <div class="r tot"><span>Total pemasukan</span><span>${rp(c.inc)}</span></div>
+        <h3>Pengeluaran</h3>
+        ${ex.length?ex.map(e=>`<div class="r ind"><span>${esc(e.desc||"-")} · ${e.method==="cashless"?"cashless":"cash"}</span><span>${rp(e.amount)}</span></div>`).join(""):`<div class="r ind"><span>Tidak ada</span><span>Rp0</span></div>`}
+        <div class="r tot"><span>Total pengeluaran</span><span>${rp(c.out)}</span></div>
+        <div class="r tot"><span>Saldo bersih</span><span>${rp(c.net)}</span></div>
+      </div>
+      <div class="receipt">
+        <h3>Cash di laci</h3>
+        <div class="r ind"><span>Cash awal</span><span>${rp(r.openingCash)}</span></div>
+        <div class="r ind"><span>+ Pemasukan cash</span><span>${rp(r.income?.cash)}</span></div>
+        <div class="r ind"><span>− Pengeluaran cash</span><span>${neg(c.outCash)}</span></div>
+        <div class="r ind"><span>− Cash to cashless</span><span>${neg(r.cashToCashless)}</span></div>
+        <div class="r tot"><span>Cash akhir di laci</span><span>${rp(c.drawer)}</span></div>
+        <h3>Item terjual</h3>
+        <div class="kpi-hero" id="savedKpi"></div>
+        ${r.notes?`<h3>Catatan</h3><p class="hint" style="color:var(--ink)">${esc(r.notes)}</p>`:""}
+      </div>
+    </div>
+    <div class="acts"><button class="btn primary" type="button" id="editRep">Ubah laporan</button><button class="btn" type="button" id="nextRep">${isAdmin()?"Isi laporan lain":"Laporan tanggal lain"}</button></div>`;
+  kpiHero($("#savedKpi"),cnt,target,"KPI hari itu");
+  $("#editRep").onclick=()=>{S.editing=true;showMode("form");window.scrollTo(0,0)};
+  $("#nextRep").onclick=()=>{if(isAdmin()){$("#repFor").focus()}else{$("#repDate").focus();try{$("#repDate").showPicker()}catch(e){}}};
+}
+$("#cancelEdit").onclick=()=>{S.editing=false;loadDraft()};
 $("#prevDay").onclick=()=>changeDate(addDays($("#repDate").value||today(),-1));
 $("#nextDay").onclick=()=>changeDate(addDays($("#repDate").value||today(),1));
 $("#repDate").addEventListener("change",()=>changeDate($("#repDate").value||today()));
-$("#repFor").addEventListener("change",()=>loadDraft());
-async function changeDate(d){$("#repDate").value=d;try{await loadDraft()}catch(e){}}
+$("#repFor").addEventListener("change",()=>{S.editing=false;loadDraft()});
+async function changeDate(d){$("#repDate").value=d;S.editing=false;try{await loadDraft()}catch(e){}}
 
 $("#saveRep").onclick=async()=>{
   const d=S.draft,date=$("#repDate").value||today();
-  const data={income:d.income,expenses:d.expenses.filter(e=>e.desc.trim()||e.amount),itemsSold:d.itemsSold||0,notes:d.notes};
-  if(!data.itemsSold&&!incomeTotal(data)&&!data.expenses.length){toast("Laporan masih kosong.");return}
+  const data={openingCash:d.openingCash||0,income:d.income,expenses:d.expenses.filter(e=>e.desc.trim()||e.amount),cashToCashless:d.cashToCashless||0,itemsSold:d.itemsSold||0,notes:d.notes};
+  if(!data.itemsSold&&!incomeTotal(data)&&!data.expenses.length&&!data.openingCash){toast("Laporan masih kosong.");return}
   $("#saveRep").disabled=true;$("#saveState").textContent="Menyimpan…";
   try{
     const r=await call("saveReport",{date,userId:currentFor(),data});
     const m=date.slice(0,7);S.months[m]=(S.months[m]||[]).filter(x=>!(x.date===date&&x.userId===r.report.userId)).concat([r.report]);
-    toast("Laporan disimpan");await loadDraft();$("#saveState").textContent="";
+    toast("Laporan disimpan");S.editing=false;await loadDraft();$("#saveState").textContent="";window.scrollTo(0,0);
   }catch(e){$("#saveState").textContent="Belum tersimpan"}
   finally{$("#saveRep").disabled=false}
 };
@@ -675,7 +774,7 @@ $("#delRep").onclick=async()=>{
   if(!delArm){delArm=true;$("#delRep").textContent="Yakin hapus?";setTimeout(()=>{delArm=false;$("#delRep").textContent="Hapus laporan"},3500);return}
   delArm=false;$("#delRep").textContent="Hapus laporan";
   const date=$("#repDate").value,uid=currentFor();
-  try{await call("deleteReport",{date,userId:uid});const m=date.slice(0,7);S.months[m]=(S.months[m]||[]).filter(x=>!(x.date===date&&x.userId===uid));toast("Laporan dihapus");await loadDraft()}catch(e){}
+  try{await call("deleteReport",{date,userId:uid});const m=date.slice(0,7);S.months[m]=(S.months[m]||[]).filter(x=>!(x.date===date&&x.userId===uid));toast("Laporan dihapus");S.editing=false;await loadDraft()}catch(e){}
 };
 
 /* ================= bars ================= */
@@ -715,16 +814,16 @@ async function renderRekap(){
   const days=Object.keys(byDay).sort().reverse();
   $("#rekapBody").innerHTML=days.length?days.map(d=>{const rs=byDay[d],s=f=>rs.reduce((a,r)=>a+f(r),0);
     const di=s(incomeTotal),dout=s(expTotal);
-    let html=`<tr class="day" data-d="${d}" tabindex="0" aria-expanded="${openDay===d}"><td><b>${shortDate(d)}</b> <span class="hint">${rs.length} laporan</span></td><td>${rp(s(r=>r.income?.qris||0))}</td><td>${rp(s(r=>r.income?.transfer||0))}</td><td>${rp(s(r=>r.income?.cash||0))}</td><td>${rp(dout)}</td><td class="${di-dout<0?"neg":""}"><b>${rp(di-dout)}</b></td><td>${s(kpiCount)}</td></tr>`;
-    if(openDay===d)html+=`<tr class="detail"><td colspan="7"><div class="det">${rs.map(r=>`<div class="det-card"><b>${esc(r.userName)}</b><span>Pemasukan ${rp(incomeTotal(r))} (QRIS ${rp(r.income?.qris)}, Transfer ${rp(r.income?.transfer)}, Cash ${rp(r.income?.cash)})</span><span>Pengeluaran ${rp(expTotal(r))}${(r.expenses||[]).length?": "+r.expenses.map(e=>esc(e.desc||"-")+" "+rp(e.amount)).join(", "):""}</span><span>Item terjual: <b>${kpiCount(r)}</b> (${Math.round(kpiCount(r)/(S.config.kpi||20)*100)}% KPI)</span>${r.notes?`<span>Catatan: ${esc(r.notes)}</span>`:""}</div>`).join("")}</div></td></tr>`;
-    return html}).join(""):`<tr><td colspan="7"><div class="empty"><b>Belum ada laporan di ${monthLabel(m)}</b>Laporan dari tim akan terkumpul di sini.</div></td></tr>`;
+    let html=`<tr class="day" data-d="${d}" tabindex="0" aria-expanded="${openDay===d}"><td><b>${shortDate(d)}</b> <span class="hint">${rs.length} laporan</span></td><td>${rp(s(r=>r.income?.qris||0))}</td><td>${rp(s(r=>r.income?.transfer||0))}</td><td>${rp(s(r=>r.income?.cash||0))}</td><td>${rp(dout)}</td><td class="${di-dout<0?"neg":""}"><b>${rp(di-dout)}</b></td><td>${rp(s(r=>calcReport(r).drawer))}</td><td>${s(kpiCount)}</td></tr>`;
+    if(openDay===d)html+=`<tr class="detail"><td colspan="8"><div class="det">${rs.map(r=>`<div class="det-card"><b>${esc(r.userName)}</b><span>Pemasukan ${rp(incomeTotal(r))} (QRIS ${rp(r.income?.qris)}, Transfer ${rp(r.income?.transfer)}, Cash ${rp(r.income?.cash)})</span><span>Pengeluaran ${rp(expTotal(r))}${(r.expenses||[]).length?": "+r.expenses.map(e=>esc(e.desc||"-")+" "+rp(e.amount)+" ("+(e.method==="cashless"?"cashless":"cash")+")").join(", "):""}</span><span>Cash awal ${rp(r.openingCash)} · Cash to cashless ${rp(r.cashToCashless)} · <b>Cash akhir ${rp(calcReport(r).drawer)}</b></span><span>Item terjual: <b>${kpiCount(r)}</b> (${Math.round(kpiCount(r)/(S.config.kpi||20)*100)}% KPI)</span>${r.notes?`<span>Catatan: ${esc(r.notes)}</span>`:""}</div>`).join("")}</div></td></tr>`;
+    return html}).join(""):`<tr><td colspan="8"><div class="empty"><b>Belum ada laporan di ${monthLabel(m)}</b>Laporan dari tim akan terkumpul di sini.</div></td></tr>`;
   S.rekapReps=reps;
 }
 $("#rekapBody").addEventListener("click",e=>{const tr=e.target.closest("tr.day");if(!tr)return;openDay=openDay===tr.dataset.d?null:tr.dataset.d;renderRekap()});
 $("#rekapBody").addEventListener("keydown",e=>{if(e.key==="Enter"){const tr=e.target.closest("tr.day");if(tr){openDay=openDay===tr.dataset.d?null:tr.dataset.d;renderRekap()}}});
 $("#copyCsv").onclick=async()=>{
-  const rows=[["Tanggal","Nama","QRIS","Transfer","Cash","Total pemasukan","Pengeluaran","Bersih","Item terjual","% KPI","Catatan"]];
-  (S.rekapReps||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>rows.push([r.date,r.userName,r.income?.qris||0,r.income?.transfer||0,r.income?.cash||0,incomeTotal(r),expTotal(r),incomeTotal(r)-expTotal(r),kpiCount(r),Math.round(kpiCount(r)/(S.config.kpi||20)*100),r.notes||""]));
+  const rows=[["Tanggal","Nama","Cash awal","QRIS","Transfer","Cash","Total pemasukan","Pengeluaran cash","Pengeluaran cashless","Total pengeluaran","Bersih","Cash to cashless","Cash akhir","Item terjual","% KPI","Catatan"]];
+  (S.rekapReps||[]).slice().sort((a,b)=>a.date.localeCompare(b.date)).forEach(r=>{const c=calcReport(r);rows.push([r.date,r.userName,r.openingCash||0,r.income?.qris||0,r.income?.transfer||0,r.income?.cash||0,c.inc,c.outCash,c.outCl,c.out,c.net,r.cashToCashless||0,c.drawer,kpiCount(r),Math.round(kpiCount(r)/(S.config.kpi||20)*100),r.notes||""])});
   const csv=rows.map(r=>r.map(c=>{const s=String(c??"");return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s}).join(",")).join("\n");
   try{await navigator.clipboard.writeText(csv);toast(`${rows.length-1} baris disalin, tempel ke Excel/Sheets`)}catch(e){toast("Browser menolak menyalin.")}
 };
