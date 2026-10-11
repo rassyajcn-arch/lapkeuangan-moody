@@ -118,6 +118,7 @@ textarea{resize:vertical;min-height:70px}
 .seg button[aria-pressed="true"]{background:var(--green);color:var(--on-green)}
 .seg button.cl[aria-pressed="true"]{background:#4C9C7E;color:#fff}
 .summary .sec{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-top:4px}
+.summary .row.tot span:first-child{opacity:1;font-weight:700}
 .summary .div{border-top:1px solid rgba(255,255,255,.22);margin-block:2px}
 .summary .row.ind span:first-child{padding-left:12px;opacity:.75}
 .saved{gap:16px}
@@ -693,11 +694,12 @@ function recalc(){
     <div class="row ind"><span>QRIS</span><span>${rp(d.income.qris)}</span></div>
     <div class="row ind"><span>Transfer</span><span>${rp(d.income.transfer)}</span></div>
     <div class="row ind"><span>Cash</span><span>${rp(d.income.cash)}</span></div>
-    <div class="row"><span>Total pemasukan</span><b>${rp(c.inc)}</b></div>
-    <div class="row"><span>Total pengeluaran</span><b>${neg(c.out)}</b></div>
-    <div class="row ind"><span>dibayar cash</span><span>${rp(c.outCash)}</span></div>
-    <div class="row ind"><span>dibayar cashless</span><span>${rp(c.outCl)}</span></div>
-    <div class="row big"><span>Saldo bersih</span><b>${rp(c.net)}</b></div>
+    <div class="row tot"><span>Total pemasukan</span><b>${rp(c.inc)}</b></div>
+    <div class="div"></div>
+    <div class="sec">Pengeluaran</div>
+    <div class="row ind"><span>Pengeluaran cash</span><span>${rp(c.outCash)}</span></div>
+    <div class="row ind"><span>Pengeluaran cashless</span><span>${rp(c.outCl)}</span></div>
+    <div class="row tot"><span>Total pengeluaran</span><b>${rp(c.out)}</b></div>
     <div class="div"></div>
     <div class="sec">Cash di laci</div>
     <div class="row ind"><span>Cash awal</span><span>${rp(d.openingCash)}</span></div>
@@ -730,8 +732,9 @@ function renderSaved(){
         <div class="r tot"><span>Total pemasukan</span><span>${rp(c.inc)}</span></div>
         <h3>Pengeluaran</h3>
         ${ex.length?ex.map(e=>`<div class="r ind"><span>${esc(e.desc||"-")} · ${e.method==="cashless"?"cashless":"cash"}</span><span>${rp(e.amount)}</span></div>`).join(""):`<div class="r ind"><span>Tidak ada</span><span>Rp0</span></div>`}
+        <div class="r ind" style="border-top:1.5px dashed var(--line);padding-top:6px"><span>Pengeluaran cash</span><span>${rp(c.outCash)}</span></div>
+        <div class="r ind"><span>Pengeluaran cashless</span><span>${rp(c.outCl)}</span></div>
         <div class="r tot"><span>Total pengeluaran</span><span>${rp(c.out)}</span></div>
-        <div class="r tot"><span>Saldo bersih</span><span>${rp(c.net)}</span></div>
       </div>
       <div class="receipt">
         <h3>Cash di laci</h3>
