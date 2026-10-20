@@ -28,7 +28,7 @@ async function getProfiles(store) {
   return (await store.get("profiles", { type: "json" })) || [];
 }
 async function getConfig(store) {
-  return { kpi: 20, ...((await store.get("config", { type: "json" })) || {}) };
+  return { kpi: 20, monthGoal: 600, ...((await store.get("config", { type: "json" })) || {}) };
 }
 async function getKatalog(store) {
   const k = await store.get("katalog", { type: "json" });
@@ -58,6 +58,7 @@ function cleanReport(d, date, who, by) {
     openingCash: num(d.openingCash),
     income: { qris: num(income.qris), transfer: num(income.transfer), cash: num(income.cash) },
     cashToCashless: num(d.cashToCashless),
+    c2cNote: str(d.c2cNote, 200),
     expenses: (Array.isArray(d.expenses) ? d.expenses : [])
       .map((e) => ({ desc: str(e.desc, 120), amount: num(e.amount), method: e.method === "cashless" ? "cashless" : "cash" }))
       .filter((e) => e.desc || e.amount)
@@ -158,7 +159,7 @@ export default async (req) => {
 
     case "saveConfig": {
       if (!isAdmin) return deny();
-      const cfg = { ...(await getConfig(store)), kpi: Math.max(1, num(b.config?.kpi) || 20) };
+      const cfg = { ...(await getConfig(store)), kpi: Math.max(1, num(b.config?.kpi) || 20), monthGoal: Math.max(1, num(b.config?.monthGoal) || 600) };
       await store.setJSON("config", cfg);
       return json({ ok: true, config: cfg });
     }
